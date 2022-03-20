@@ -76,13 +76,23 @@ public class UploadController {
         return new ResponseEntity<>(resultDTOList,HttpStatus.OK);
     }
 
+    /*
+    조회 화면에서는 섬네일 클릭 시 이미지의 원본 파일을 볼 수 있는 방법을 제공해야함.
+    size라는 파라미터를 추가해서 원본 파일인지 썸네일인지 ㄱ분하도록함.
+    ->만약 size 변수 값이 1인 경우 원본 파일을 전송.
+     */
     @GetMapping("/display")
-    public ResponseEntity<byte[]> getFile(String fileName){
+    public ResponseEntity<byte[]> getFile(String fileName, String size){
         ResponseEntity<byte[]> result = null;
         try {
             String srcFileName = URLDecoder.decode(fileName,"UTF-8");
             log.info("fileName: "+srcFileName);
             File file = new File(uploadPath+File.separator+srcFileName);
+
+            if(size != null && size.equals("1")){
+                file = new File(file.getParent(), file.getName().substring(2));
+            }
+
             log.info("file: "+file);
             HttpHeaders header = new HttpHeaders();
 

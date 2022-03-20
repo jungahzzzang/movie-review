@@ -2,6 +2,8 @@ package org.zerock.mreview.service;
 
 import org.zerock.mreview.dto.MovieDTO;
 import org.zerock.mreview.dto.MovieImageDTO;
+import org.zerock.mreview.dto.PageRequestDTO;
+import org.zerock.mreview.dto.PageResultDTO;
 import org.zerock.mreview.entity.Movie;
 import org.zerock.mreview.entity.MovieImage;
 
@@ -12,7 +14,37 @@ import java.util.stream.Collectors;
 
 public interface MovieService {
 
+    //등록
     Long register(MovieDTO movieDTO);
+
+    //목록 처리
+    PageResultDTO<MovieDTO, Object[]> getList(PageRequestDTO requestDTO);
+
+    //조회 처리
+    MovieDTO getMovie(Long mno);
+
+                                        //여러 개의 이미지를 처리하기 위해 List로 받음,  Double 타입의 평점 평균, Long 타입의 리뷰 개수
+    default MovieDTO entitiesToDTO(Movie movie, List<MovieImage> movieImages, Double avg, Long reviewCnt){
+        MovieDTO movieDTO = MovieDTO.builder()
+                .mno(movie.getMno())
+                .title(movie.getTitle())
+                .regDate(movie.getRegDate())
+                .modDate(movie.getModDate())
+                .build();
+
+        List<MovieImageDTO> movieImageDTOList = movieImages.stream().map(movieImage -> {
+            return MovieImageDTO.builder().imgName(movieImage.getImgName())
+                    .path(movieImage.getPath())
+                    .uuid(movieImage.getUuid())
+                    .build();
+        }).collect(Collectors.toList());
+
+        movieDTO.setImageDTOList(movieImageDTOList);
+        movieDTO.setAvg(avg);
+        movieDTO.setReviewCnt(reviewCnt.intValue());
+
+        return movieDTO;
+    }
 
     /*
     Movie를 JPA로 처리하기 위해서는 MovieDTO > Movie 객체로 변환 필요
